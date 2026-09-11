@@ -1,0 +1,86 @@
+# ============================================================
+# MPA-FER reproduction config: RAF-DB + CLIP ViT-B/16
+# paper      = value stated in the paper (arXiv 2506.21017)
+# ASSUMPTION = paper doesn't say, our choice (listed in README)
+# ============================================================
+
+experiment_name: mpa_fer_rafdb_vitb16
+seed: 42                                    # ASSUMPTION
+
+data:
+  dataset: rafdb
+  root: /content/rafdb                      # real path gets set from the Colab notebook
+  class_names:                              # RAF-DB label order: 1=surprise ... 7=neutral
+    - surprise
+    - fear
+    - disgust
+    - happiness
+    - sadness
+    - anger
+    - neutral
+  image_size: 224                           # paper
+  num_workers: 2                            # free Colab has 2 CPU cores
+  augment:
+    random_resized_crop_scale: [0.8, 1.0]   # paper says "random cropping"; scale is ASSUMPTION
+    horizontal_flip: true                   # ASSUMPTION (standard for FER)
+    random_erasing_p: 0.25                  # paper says "erasing"; probability is ASSUMPTION
+
+model:
+  clip_backbone: ViT-B/16                   # paper
+  logit_scale: 100.0                        # ASSUMPTION: CLIP's own scale for final logits
+
+  text_prompts:
+    n_ctx: 10                               # paper
+    init_std: 0.02                          # paper
+    class_specific_ctx: false               # ASSUMPTION: one shared context for all classes (CoOp default)
+
+  visual_prompts:
+    enabled: true                           # Table 1, row 2
+    n_prompts: 8                            # paper (Np)
+    init_std: 0.02                          # paper
+
+  local_align:
+    enabled: true                           # Table 1, row 5
+    top_k: 16                               # paper
+
+hard_prompts:
+  type: 3                                   # Table 2: pick 1, 2 or 3
+  templates:
+    1: "a photo of {cls}"
+    2: "a photo of a person making a facial expression of {cls}"
+    3: "a photo of a person making a facial expression of {cls}, {desc}"
+  descriptions_file: prompts/rafdb_descriptions.json
+
+losses:
+  soft_hard_align:
+    enabled: true                           # Table 1, row 4
+    beta: 1.0                               # paper
+    tau: 0.01                               # ASSUMPTION: same temperature as CLIP
+    token_pooling: mean                     # ASSUMPTION: average token embeddings before cosine (Eq. 1)
+  proto_align:
+    enabled: true                           # Table 1, row 3
+    gamma: 1.0                              # paper
+    match: cosine                           # paper allows l1 or cosine; our pick
+    samples_per_class: -1                   # -1 = full training set (Table 3 "Full")
+    prototypes_file: null                   # null = saved inside output.dir
+
+train:
+  epochs: 120                               # paper (we'll use 3-5 for quick checks)
+  batch_size: 32                            # paper
+  lr: 0.032                                 # paper
+  momentum: 0.9                             # ASSUMPTION (CoOp default)
+  weight_decay: 0.0005                      # ASSUMPTION (CoOp default)
+  scheduler: cosine                         # paper
+  warmup_epochs: 1                          # ASSUMPTION (CoOp default, set 0 to disable)
+  amp: true                                 # fp16 mixed precision for T4
+  max_iters_per_epoch: null                 # e.g. 20 for a very fast smoke test
+  log_every: 50
+
+eval:
+  batch_size: 128
+  every_n_epochs: 1
+
+output:
+  dir: outputs/mpa_fer_rafdb_vitb16         # gets pointed to Google Drive in Colab
+  save_every_n_epochs: 1
+  resume: true                              # continue from last.pt if it exists
