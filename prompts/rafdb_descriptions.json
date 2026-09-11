@@ -1,0 +1,13 @@
+{
+  "_source": "Written by Claude from facial action unit (FACS) knowledge. The paper used ChatGPT-3.5, so this is a reproduction difference.",
+  "_query": "What are the most useful visual features to distinguish the facial expression of [class]?",
+  "descriptions": {
+    "surprise": "raised curved eyebrows, horizontal forehead wrinkles, wide open eyes showing white above the iris, dropped jaw with an open relaxed mouth",
+    "fear": "eyebrows raised and pulled together, wide open eyes with tensed lower eyelids, lips stretched horizontally toward the ears, slightly open mouth",
+    "disgust": "wrinkled nose, raised upper lip, lowered eyebrows, narrowed eyes, raised cheeks, lower lip pushed up or turned down",
+    "happiness": "a smiling mouth with raised lip corners, raised cheeks, wrinkled eyes with crow's feet, arched eyebrows, often visible teeth",
+    "sadness": "inner corners of the eyebrows raised and pulled together, drooping upper eyelids, lip corners pulled down, raised chin, downcast gaze",
+    "anger": "eyebrows lowered and pulled together, vertical wrinkles between the brows, glaring eyes with tense eyelids, lips pressed tightly or open showing teeth, flared nostrils",
+    "neutral": "relaxed eyebrows in resting position, normally open eyes, closed relaxed lips, no wrinkles on the forehead or nose, calm symmetrical face"
+  }
+}
