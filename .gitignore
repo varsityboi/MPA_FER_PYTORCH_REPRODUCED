@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Dataset and training outputs (too big for GitHub)
+data/
+checkpoints/
+outputs/
+logs/
+*.pt
+*.pth
+
+# Editor / OS junk
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Secrets (never upload these)
+.env
+kaggle.json
