@@ -37,12 +37,14 @@ class MPAFER(nn.Module):
         visual_init_std=0.02,
         local_align_enabled=True,
         top_k=16,
+        local_weight=1.0,
         logit_scale=100.0,
     ):
         super().__init__()
         self.class_names = list(class_names)
         self.local_align_enabled = local_align_enabled
         self.top_k = top_k
+        self.local_weight = local_weight
         self.logit_scale = logit_scale
 
         self.text_prompts = TextPromptLearner(
@@ -100,7 +102,7 @@ class MPAFER(nn.Module):
             local_sim = torch.einsum("bnd,cd->bnc", img_l, txt)      # (B, N, C)
             k = min(self.top_k, local_sim.shape[1])
             topk_sim = local_sim.topk(k, dim=1).values.mean(dim=1)   # (B, C), top-k picked per class
-            sim = sim + topk_sim
+            sim = sim + self.local_weight * topk_sim
 
         return self.logit_scale * sim
 
@@ -164,6 +166,7 @@ def build_model(cfg, device="cuda"):
         visual_init_std=mcfg["visual_prompts"]["init_std"],
         local_align_enabled=mcfg["local_align"]["enabled"],
         top_k=mcfg["local_align"]["top_k"],
+        local_weight=mcfg["local_align"].get("local_weight", 1.0),
         logit_scale=mcfg["logit_scale"],
     )
     return model.to(device)
