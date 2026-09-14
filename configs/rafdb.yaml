@@ -19,6 +19,7 @@ data:
     - anger
     - neutral
   image_size: 224                           # paper
+  layout: auto                              # auto | official | folder (see dataset.py)
   num_workers: 2                            # free Colab has 2 CPU cores
   augment:
     random_resized_crop_scale: [0.8, 1.0]   # paper says "random cropping"; scale is ASSUMPTION
@@ -42,6 +43,7 @@ model:
   local_align:
     enabled: true                           # Table 1, row 5
     top_k: 16                               # paper
+    local_weight: 1.0                       # Eq. 10 adds the two similarities with equal weight
 
 hard_prompts:
   type: 3                                   # Table 2: pick 1, 2 or 3
@@ -55,7 +57,8 @@ losses:
   soft_hard_align:
     enabled: true                           # Table 1, row 4
     beta: 1.0                               # paper
-    tau: 0.01                               # ASSUMPTION: same temperature as CLIP
+    tau: 0.07                               # ASSUMPTION: CLIP's *init* temperature. 0.01 (CLIP's learned
+                                            #   value) makes this loss explode at step 0 - see README
     token_pooling: mean                     # ASSUMPTION: average token embeddings before cosine (Eq. 1)
   proto_align:
     enabled: true                           # Table 1, row 3
@@ -72,6 +75,8 @@ train:
   weight_decay: 0.0005                      # ASSUMPTION (CoOp default)
   scheduler: cosine                         # paper
   warmup_epochs: 1                          # ASSUMPTION (CoOp default, set 0 to disable)
+  grad_clip: 1.0                            # ASSUMPTION: not in the paper, but lr=0.032 + logit_scale=100
+                                            #   is a spiky combination. null disables it.
   amp: true                                 # fp16 mixed precision for T4
   max_iters_per_epoch: null                 # e.g. 20 for a very fast smoke test
   log_every: 50
