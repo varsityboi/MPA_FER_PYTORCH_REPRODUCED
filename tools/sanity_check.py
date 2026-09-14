@@ -203,8 +203,9 @@ def main(ck, args):
     ck.ok("trainable count matches config", n_train == sum(expected.values()),
           f"{n_train:,} vs expected {sum(expected.values()):,}")
     ck.ok("all weights are float32", all(p.dtype == torch.float32 for p in model.parameters()))
-    ck.info(f"paper reports 0.218M trainable for ViT-B/16, ours is {n_train / 1e6:.3f}M (known gap, goes in README)")
-
+    #ck.info(f"paper reports 0.218M trainable for ViT-B/16, ours is {n_train / 1e6:.3f}M (known gap, goes in README)")
+    ck.info(f"{n_train:,} params = {n_train * 4 / 1024**2:.3f} MB in fp32 "
+            f"(paper quotes 0.218 MB for ViT-B/16; known gap, goes in README)")
     # ---------------- 4. match original CLIP ----------------
     ck.section("4. Our encoders match original CLIP")
     images, labels = make_fake_batch(4, n_cls, device)
